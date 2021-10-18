@@ -1,0 +1,60 @@
+version: '3.7'
+services:
+  trino:
+    hostname: trino
+    container_name: trino
+    image: 'trinodb/trino:356'
+    ports:
+      - '8080:8080'
+    volumes:
+      - ./etc:/etc/trino:ro
+    networks:
+      - trino-network
+
+  mariadb:
+    hostname: mariadb
+    container_name: mariadb
+    image: mariadb:10.6.0
+    ports:
+      - 3308:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
+      MYSQL_DATABASE: metastore_db
+    networks:
+      - trino-network
+
+  hive-metastore:
+    hostname: hive-metastore
+    container_name: hive-metastore
+    image: 'bitsondatadev/hive-metastore:latest'
+    ports:
+      - '9083:9083' # Metastore Thrift
+    volumes:
+      - ./conf/metastore-site.xml:/opt/apache-hive-metastore-3.0.0-bin/conf/metastore-site.xml:ro
+    environment:
+      METASTORE_DB_HOSTNAME: mariadb
+    depends_on:
+      - mariadb
+    networks:
+      - trino-network
+      
+  superset:
+    build: ./superset
+    hostname: superset
+    container_name: superset
+    ports:
+      - "8088:8088"
+    volumes:
+      - superset-data:/app/superset_home
+    networks:
+      - trino-network
+
+volumes:
+  superset-data:
+    driver: local
+
+networks:
+  trino-network:
+    driver: bridge
