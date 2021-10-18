@@ -1,5 +1,5 @@
 
-# POC Minio > HIVE Metastore > Trino (anciennement Presto) > Superset
+# POC Minio - HIVE Metastore - Trino - Superset
 
 
 ### A quoi servent toutes ces briques ?
